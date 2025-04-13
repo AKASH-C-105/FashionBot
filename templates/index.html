@@ -1,191 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FashionBot</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, rgba(255,213,79,1) 0%, rgba(255,111,97,1) 50%, rgba(247,148,30,1) 100%);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .chat-container {
-            backdrop-filter: blur(15px);
-            width: 400px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-        
-
-        .chat-header {
-            backdrop-filter: blur(25px);
-            background:white;
-            color: #FF6F61;
-            
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .chat-box {
-    
-    color: black;
-    padding: 10px;
-    margin: 10px 0;
-    height: 450px; /* Set a fixed height */
-    max-height: 450px; /* Ensures responsiveness */
-    overflow-y: auto; 
-        font-family: 'Poppins', sans-serif;
-    font-size: 1em;
-    line-height: 1.5;
-    max-width: 90%;
-    text-align: left;
-    display: inline-block;
-}
-.chat-box::-webkit-scrollbar {
-    width: 6px; /* Narrow scrollbar width */
-    background: transparent; /* No background for scrollbar */
-}
-
-.chat-box::-webkit-scrollbar-thumb {
-    background-color: rgba(247, 148, 30, 0.7); /* Scrollbar thumb color */
-    border-radius: 10px; /* Rounded scrollbar */
-}
-
-.chat-box::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(247, 148, 30, 1); /* Darker thumb on hover */
-}
-
-.chat-box::-webkit-scrollbar-track {
-    background: transparent; /* Remove scrollbar track background */
-}
-
-
-       .user-message {
-            margin-left: auto;
-            background-color: rgba(233, 74, 122, 0.8); 
-            color: white;
-            padding: 10px;
-            border-radius: 20px 20px 0 20px;
-            max-width: 70%;
-        }
-
-        .bot-message {
-            margin-right: auto;
-            background-color: #f1f1f1;
-            color: black;
-            padding: 10px;
-            border-radius: 20px 20px 20px 0;
-            max-width: 70%;
-        }
-
-        .input-container {
-            display: flex;
-            padding: 10px;
-            background-color: white;
-        }
-
-        .input-container input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            outline: none;
-        }
-
-        .input-container button {
-            background-color: #FF6F61;
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            margin-left: 10px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FashionBot ✨</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-light: #fefefe;
+      --bg-dark: #1c1c1c;
+      --text-light: #000;
+      --text-dark: #fff;
+      --primary: #FF6F61;
+      --bubble-user: rgba(233, 74, 122, 0.8);
+      --bubble-bot: #f1f1f1;
+    }
+  
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-light);
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+  
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+  
+    .chat-container {
+      width: 400px;
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(15px);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+  
+    .chat-header {
+      background-color: var(--primary);
+      padding: 15px;
+      font-weight: bold;
+      font-size: 20px;
+      text-align: center;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .chat-box {
+      padding: 10px;
+      height: 400px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.7);
+    }
+  
+    .chat-box.dark-mode {
+      background: rgba(30, 30, 30, 0.7);
+    }
+  
+    .user-message, .bot-message {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 20px;
+      max-width: 80%;
+    }
+  
+    .user-message {
+      background-color: var(--bubble-user);
+      color: #fff;
+      margin-left: auto;
+    }
+  
+    .bot-message {
+      background-color: var(--bubble-bot);
+      color: #000;
+      margin-right: auto;
+    }
+  
+    .input-container {
+      display: flex;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border-top: 1px solid #ddd;
+    }
+  
+    body.dark-mode .input-container {
+      background-color: #1c1c1c;
+    }
+  
+    .input-container input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 20px;
+      border: 1px solid #ccc;
+      background-color: white;
+      color: black;
+    }
+  
+    body.dark-mode .input-container input {
+      background-color: #333;
+      color: white;
+      border-color: #555;
+    }
+  
+    .input-container button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 20px;
+      margin-left: 5px;
+      cursor: pointer;
+    }
+  
+    .toggle-dark {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1em;
+    }
+  
+    .mic-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 1.4em;
+      cursor: pointer;
+    }
+  </style>
+  
 </head>
 <body>
-
-<div class="chat-container">
-    <div class="chat-header"><span>FashionBot</span></div>
-    <div class="chat-box" id="chat-box">
-        <!-- Bot initial message will appear here -->
+  <div class="chat-container">
+    <div class="chat-header">
+      <span>FashionBot ✨</span>
+      <div>
+        <button class="toggle-dark" onclick="toggleTheme()">🌗</button>
+      </div>
     </div>
+    <div class="chat-box" id="chat-box"></div>
     <div class="input-container">
-        <input type="text" id="userInput" placeholder="Type your message here...">
-        <button id="sendBtn">Send</button>
+      <input type="text" id="userInput" placeholder="Type your message here..." />
+      <button onclick="startVoice()">🎙️</button>
+      <button onclick="sendMessage()">Send</button>
     </div>
-</div>
+  </div>
 
-<script>
+  <script>
     let step = 1;
-    let gender = "";
-    let eventType = "";
-    let color = "";
-    let style = "";
-
-    function addMessage(message, sender) {
-        const messageDiv = document.createElement('div');
-        messageDiv.classList.add('chat-message', sender === 'bot' ? 'bot-message' : 'user-message');
-        messageDiv.innerText = message;
-        document.getElementById('chat-box').appendChild(messageDiv);
-        document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+    let gender = "", eventType = "", color = "", style = "";
+    let lastSuggestion = null;
+    let isEnded = false;
+  
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("userInput");
+    const inputContainer = document.querySelector(".input-container");
+  
+    function appendMessage(message, sender) {
+      const div = document.createElement("div");
+      div.className = sender === "user" ? "user-message" : "bot-message";
+      div.innerText = message;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
-
-    // Initial greeting message when the page loads
-    window.onload = function() {
-        const initialMessage = "Hello! Welcome to FashionBot. Who are you shopping for? (Male, Female, Unisex)";
-        addMessage(initialMessage, 'bot');
-    };
-
-    document.getElementById('sendBtn').addEventListener('click', function() {
-        const userInput = document.getElementById('userInput').value;
-        if (userInput.trim() === '') return;
-
-        // Add user message to the chat box
-        addMessage(userInput, 'user');
-        document.getElementById('userInput').value = '';
-
-        // Send user input to the Flask backend using fetch
-        fetch('/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                step: step,
-                input: userInput,
-                gender: gender,
-                eventType: eventType,
-                color: color,
-                style: style,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Update bot message based on the backend response
-            addMessage(data.response, 'bot');
-
-            // Update step and saved variables
-            step = data.step;
-            gender = data.gender || gender;
-            eventType = data.eventType || eventType;
-            color = data.color || color;
-            style = data.style || style;
-        })
-        .catch(error => console.error('Error:', error));
+  
+    function sendMessage() {
+      if (isEnded) return;
+  
+      const message = userInput.value.trim();
+      if (!message) return;
+      appendMessage(message, "user");
+  
+      const normalizedMsg = message.toLowerCase();
+      const isExitCommand = normalizedMsg === "exit" || normalizedMsg === "quit";
+      const isFinalStepNo = normalizedMsg === "no" && step === 5; // Step 5 = after a suggestion is given
+  
+      if (isExitCommand || isFinalStepNo) {
+        isEnded = true;
+        appendMessage("👋 Thank you for chatting with FashionBot! Stay stylish and take care! ✨", "bot");
+  
+        userInput.disabled = true;
+        inputContainer.querySelectorAll("button").forEach(btn => btn.disabled = true);
+  
+        const restartBtn = document.createElement("button");
+        restartBtn.textContent = "🔄 Start Again";
+        restartBtn.style.cssText = "margin: 10px auto; display: block; background: #FF6F61; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;";
+        restartBtn.onclick = restartChat;
+        chatBox.appendChild(restartBtn);
+        chatBox.scrollTop = chatBox.scrollHeight;
+  
+        return;
+      }
+  
+      fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ step, input: message, gender, eventType, color, style, last_suggestion: lastSuggestion })
+      })
+      .then(res => res.json())
+      .then(data => {
+        appendMessage(data.response, "bot");
+        step = data.step || step;
+        gender = data.gender || gender;
+        eventType = data.eventType || eventType;
+        color = data.color || color;
+        style = data.style || style;
+        lastSuggestion = data.last_suggestion || null;
+      });
+  
+      userInput.value = "";
+    }
+  
+    function restartChat() {
+      step = 1;
+      gender = eventType = color = style = "";
+      lastSuggestion = null;
+      isEnded = false;
+  
+      chatBox.innerHTML = "";
+  
+      userInput.disabled = false;
+      inputContainer.querySelectorAll("button").forEach(btn => btn.disabled = false);
+  
+      appendMessage("👋 Hello again! Who are you shopping for? (Male, Female, Unisex)", "bot");
+    }
+  
+    function toggleTheme() {
+      document.body.classList.toggle("dark-mode");
+      chatBox.classList.toggle("dark-mode");
+    }
+  
+    function startVoice() {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.start();
+      recognition.onresult = event => {
+        let transcript = event.results[0][0].transcript;
+  
+        // Remove trailing punctuation like period or comma
+        transcript = transcript.trim().replace(/[.,!?]$/, "");
+  
+        userInput.value = transcript;
+        sendMessage();
+      };
+    }
+  
+    userInput.addEventListener("keydown", e => {
+      if (e.key === "Enter") sendMessage();
     });
-</script>
-
+  
+    appendMessage("👋 Hello! Welcome to FashionBot. Who are you shopping for? (Male, Female, Unisex)", "bot");
+  </script>
+  
 </body>
 </html>

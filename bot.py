@@ -3,7 +3,6 @@ import difflib
 
 app = Flask(__name__)
 
-# Function to suggest similar words if input is not valid
 def get_suggestion(user_input, valid_options):
     suggestion = difflib.get_close_matches(user_input, valid_options, n=1, cutoff=0.6)
     return suggestion[0] if suggestion else None
@@ -22,7 +21,7 @@ def suggest_outfit(gender, event_type, color, style):
             return f"A {color} jacket, cargo pants, and hiking boots for a {style} feel."
         elif event_type == "Date Night":
             return f"A {color} casual blazer with dark jeans for a {style} style."
-    
+
     elif gender == "Female":
         if event_type == "Casual":
             return f"A {color} top with jeans or a skirt for a {style} look."
@@ -36,7 +35,7 @@ def suggest_outfit(gender, event_type, color, style):
             return f"A {color} waterproof jacket with leggings and hiking boots for a {style} feel."
         elif event_type == "Date Night":
             return f"A {color} chic dress with statement accessories for a {style} vibe."
-    
+
     elif gender == "Unisex":
         if event_type == "Casual":
             return f"A {color} hoodie or oversized T-shirt with jeans for a {style} look."
@@ -59,79 +58,86 @@ def index():
 def chat():
     data = request.get_json()
     step = data['step']
-    user_input = data['input'].strip().capitalize()
+    user_input = data['input'].strip()
     gender = data.get('gender')
     event_type = data.get('eventType')
     color = data.get('color')
     style = data.get('style')
+    last_suggestion = data.get('last_suggestion')
+    user_input_lower = user_input.lower()
+
+    # Exit condition (including "they exceed")
+    if user_input_lower in ["exit", "quit", "exit.", "quit."]:
+        return jsonify({
+            'response': "👋 Thank you for chatting with FashionBot! Stay stylish and take care! ✨",
+            'step': 0,
+            'end': True
+        })
+
+    elif user_input_lower == "yes" and last_suggestion:
+        user_input = last_suggestion
+        last_suggestion = None
+
+    user_input_cap = user_input.capitalize()
 
     if step == 1:
         valid_genders = ["Male", "Female", "Unisex"]
-        suggestion = get_suggestion(user_input, valid_genders)
-        if user_input in valid_genders:
-            response = f"Great! What type of event are you dressing for? (Casual, Formal, Party, Work, Outdoor, Date Night)"
+        suggestion = get_suggestion(user_input_cap, valid_genders)
+        if user_input_cap in valid_genders:
             step = 2
-            return jsonify({'response': response, 'step': step, 'gender': user_input})
+            return jsonify({'response': "Great! What type of event are you dressing for? (Casual, Formal, Party, Work, Outdoor, Date Night)", 'step': step, 'gender': user_input_cap})
         elif suggestion:
-            response = f"Did you mean '{suggestion}'?"
-            return jsonify({'response': response, 'step': step})
+            return jsonify({'response': f"Did you mean '{suggestion}'?", 'step': step, 'last_suggestion': suggestion})
         else:
-            response = "Please type 'Male', 'Female', or 'Unisex'."
-            return jsonify({'response': response, 'step': step})
+            return jsonify({'response': "Please type 'Male', 'Female', or 'Unisex'.", 'step': step})
 
     elif step == 2:
-        # Convert input and valid options to lowercase for better matching
         valid_events = ["Casual", "Formal", "Party", "Work", "Outdoor", "Date Night"]
-        user_input_normalized = user_input.lower()
-        valid_events_normalized = [event.lower() for event in valid_events]
-        
-        suggestion = get_suggestion(user_input_normalized, valid_events_normalized)
-        if user_input_normalized in valid_events_normalized:
-            # Normalize back to the correct case for display
-            event_type = valid_events[valid_events_normalized.index(user_input_normalized)]
-            response = f"Great choice! What is your preferred color? (e.g., Black, White, Red, Blue, Green, Pink, Yellow, Other)"
+        suggestion = get_suggestion(user_input_lower, [e.lower() for e in valid_events])
+        if user_input_lower in [e.lower() for e in valid_events]:
+            event_type = next(e for e in valid_events if e.lower() == user_input_lower)
             step = 3
-            return jsonify({'response': response, 'step': step, 'eventType': event_type, 'gender': gender})
+            return jsonify({'response': "Great choice! What is your preferred color? (e.g., Black, White, Red, Blue, Green, Pink, Yellow, Other)", 'step': step, 'eventType': event_type, 'gender': gender})
         elif suggestion:
-            suggestion_display = valid_events[valid_events_normalized.index(suggestion)]  # Display suggestion in original case
-            response = f"Did you mean '{suggestion_display}'?"
-            return jsonify({'response': response, 'step': step, 'gender': gender, 'eventType': event_type})
+            display = next(e for e in valid_events if e.lower() == suggestion)
+            return jsonify({'response': f"Did you mean '{display}'?", 'step': step, 'gender': gender, 'last_suggestion': display})
         else:
-            response = "Please choose a valid event."
-            return jsonify({'response': response, 'step': step, 'gender': gender})
+            return jsonify({'response': "Please choose a valid event.", 'step': step, 'gender': gender})
+
     elif step == 3:
-        response = f"Awesome! What style do you prefer? (Modern, Classic, Sporty, Minimalist, Vintage, Bohemian)"
         step = 4
-        return jsonify({'response': response, 'step': step, 'color': user_input, 'eventType': event_type, 'gender': gender})
+        return jsonify({'response': "Awesome! What style do you prefer? (Modern, Classic, Sporty, Minimalist, Vintage, Bohemian)", 'step': step, 'color': user_input, 'eventType': event_type, 'gender': gender})
 
     elif step == 4:
         valid_styles = ["Modern", "Classic", "Sporty", "Minimalist", "Vintage", "Bohemian"]
-        suggestion = get_suggestion(user_input, valid_styles)
-        if user_input in valid_styles:
-            # Suggest the outfit
-            outfit_suggestion = suggest_outfit(gender, event_type, color, user_input)
-            response = f"Thank you! Based on your choices, \nhere's a suggestion for your outfit:\n\n{outfit_suggestion}\n\nWould you like to continue? (Yes or No)"
+        suggestion = get_suggestion(user_input_cap, valid_styles)
+        if user_input_cap in valid_styles:
+            outfit = suggest_outfit(gender, event_type, color, user_input_cap)
             step = 5
-            return jsonify({'response': response, 'step': step, 'style': user_input})
+            return jsonify({
+                'response': (
+                    "✨ Thank you! Based on your fabulous choices... ✨\n\n"
+                    f"👗 Here's your outfit suggestion:\n💡 {outfit}\n\n"
+                    "Would you like to continue and explore more looks? (Yes or No)"
+                ),
+                'step': step,
+                'style': user_input_cap
+            })
         elif suggestion:
-            response = f"Did you mean '{suggestion}'?"
-            return jsonify({'response': response, 'step': step, 'gender': gender, 'eventType': event_type, 'color': color})
+            return jsonify({'response': f"Did you mean '{suggestion}'?", 'step': step, 'last_suggestion': suggestion})
         else:
-            response = "Please choose a valid style."
-            return jsonify({'response': response, 'step': step, 'gender': gender})
+            return jsonify({'response': "🚫 Please choose a valid style.", 'step': step})
 
     elif step == 5:
-        if user_input.lower() == 'yes':
-            response = "Great! Let's start again. Who are you shopping for? (Male, Female, Unisex)"
+        if user_input_lower == "yes":
             step = 1
-        elif user_input.lower() == 'no':
-            response = "Thank you for using FashionBot! Have a great day!"
-            step = 0
+            return jsonify({'response': "💫 Awesome! Let's create another fabulous look.\n\nWho are you shopping for? (Male, Female, Unisex)", 'step': step})
+        elif user_input_lower == "no":
+            return jsonify({'response': "👗 Thank you for using FashionBot! Stay stylish and have a fabulous day! ✨", 'step': 0, 'end': True})
         else:
-            response = "Please answer with 'Yes' or 'No'."
-        return jsonify({'response': response, 'step': step})
+            return jsonify({'response': "🧐 Please respond with 'Yes' or 'No'.", 'step': step})
 
-    return jsonify({'response': "Sorry, I didn't understand that.", 'step': step})
+    return jsonify({'response': "❓ I didn't get that. Can you try again?", 'step': step})
 
 if __name__ == '__main__':
     app.run(debug=True)
